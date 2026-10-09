@@ -122,6 +122,23 @@ describe('act loop', () => {
   });
 });
 
+describe('keyboard', () => {
+  it('dismisses an on-screen keyboard through the runner\'s action', async () => {
+    const { model, requests } = scriptedDecision((id, keys, call) => ({
+      choice: id === 'operation' ? (call === 0 ? 'dismiss_keyboard' : 'done') : id === 'verdict' ? 'holds' : (keys[0] ?? ''),
+    }));
+    const fixture = context({ tree: { id: 'root', children: [
+      { id: 'reps', role: 'textbox', name: 'Reps', value: '8' },
+      { id: 'k1', role: 'key', name: '1' },
+    ] } });
+    const verdict = await decisionExecutor({ model }).runStep(fixture.ctx);
+    expect(verdict).toMatchObject({ status: 'passed' });
+    expect(fixture.actions.dismissKeyboard).toHaveBeenCalledTimes(1);
+    expect(Object.keys(requests[0]?.questions.operation?.criteria ?? {})).toContain('dismiss_keyboard');
+    expect(fixture.turns[0]?.calls).toEqual(['dismiss the keyboard']);
+  });
+});
+
 describe('secrets', () => {
   const LOGIN: ExecutorNode = { id: 'root', children: [{ id: 'pw', role: 'textbox', name: 'Password', inputPurpose: 'password' }] };
   it('asks the secret question only with two or more secrets', async () => {

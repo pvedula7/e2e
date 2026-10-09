@@ -62,6 +62,7 @@ const OPERATIONS: Readonly<Record<Operation | Control, string>> = {
   scroll_up: 'Scroll the viewport up.',
   scroll_down: 'Scroll the viewport down.',
   back: 'Go back to the previous page, as the browser back button does.',
+  dismiss_keyboard: 'The on-screen keyboard is up. Controls it covers are missing from the elements; hide it to reach them.',
 };
 /** The fallback criterion of a target question. */
 const NONE_TARGET = 'No offered target fits the goal.';

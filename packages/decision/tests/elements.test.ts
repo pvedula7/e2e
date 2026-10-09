@@ -204,6 +204,20 @@ describe('element table', () => {
     const none = spaceFor([{ id: 'a', role: 'button', name: 'Add' }], ['tap']);
     expect(none.controls.size).toBe(0);
   });
+  it('offers dismiss_keyboard only while the tree lists a keyboard', () => {
+    // An iOS number pad lists its keys with no keyboard node above them.
+    const numberPad: ExecutorNode[] = [
+      { id: 'reps', role: 'textbox', name: 'Reps', value: '8' },
+      { id: 'pad', role: 'other', children: [{ id: 'k1', role: 'key', name: '1' }, { id: 'k2', role: 'key', name: 'Delete' }] },
+    ];
+    expect(spaceFor(numberPad).controls.has('dismiss_keyboard')).toBe(true);
+    expect(spaceFor([{ id: 'kb', role: 'keyboard' }]).controls.has('dismiss_keyboard')).toBe(true);
+    expect(spaceFor([{ id: 'a', role: 'button', name: 'Add' }]).controls.has('dismiss_keyboard')).toBe(false);
+    expect(spaceFor([{ id: 'kb', role: 'keyboard', states: { hidden: true } }]).controls.has('dismiss_keyboard')).toBe(false);
+    const hiddenPad: ExecutorNode = { id: 'pad', role: 'other', states: { hidden: true }, children: [{ id: 'k1', role: 'key', name: '1' }] };
+    expect(spaceFor([hiddenPad]).controls.has('dismiss_keyboard')).toBe(false);
+    expect(spaceFor(numberPad, ['tap', 'type', 'scroll']).controls.has('dismiss_keyboard')).toBe(false);
+  });
 });
 describe('fingerprint', () => {
   const page = (): ExecutorNode => ({ id: 'root', children: [

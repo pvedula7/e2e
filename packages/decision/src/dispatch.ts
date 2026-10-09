@@ -29,6 +29,9 @@ export async function perform(ctx: StepExecutorContext, action: Action): Promise
     case 'back':
       await actions.back();
       return undefined;
+    case 'dismiss_keyboard':
+      await actions.dismissKeyboard();
+      return undefined;
     case 'tap':
       await actions.tap(node(action.target));
       return undefined;

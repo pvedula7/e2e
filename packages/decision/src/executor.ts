@@ -391,6 +391,7 @@ const CONTROL_LABELS: Readonly<Record<Control, string>> = {
   scroll_up: 'scroll viewport up',
   scroll_down: 'scroll viewport down',
   back: 'back one step in history',
+  dismiss_keyboard: 'dismiss the keyboard',
 };
 /** The field a text ask describes: the element's label, role, and value; a textbox named by its key when the table has no row. */
 function fieldOf(key: string, element: Element | undefined): NonNullable<FieldInput['field']> {

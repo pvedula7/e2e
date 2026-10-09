@@ -17,8 +17,11 @@ export type Operation =
   | 'scroll_to'
   | 'upload'
   | 'tap_at';
-/** Viewport and history controls, always offered when the engine declares the verb. */
-export type Control = 'scroll_up' | 'scroll_down' | 'back';
+/**
+ * Viewport, history, and keyboard controls, offered when the engine declares
+ * the verb; `dismiss_keyboard` only while an on-screen keyboard is showing.
+ */
+export type Control = 'scroll_up' | 'scroll_down' | 'back' | 'dismiss_keyboard';
 /** Terminal choices: the step claims completion, reports a product failure, or gives up. */
 export type Terminal = 'done' | 'failed' | 'blocked';
 
@@ -91,6 +94,8 @@ const tappable = new Set([
 const typable = new Set(['textbox', 'searchbox', 'spinbutton', 'combobox']);
 const secretTypable = new Set(['textbox', 'searchbox', 'combobox']);
 const checkable = new Set(['checkbox', 'radio', 'switch']);
+/** Roles a device tree gives the soft keyboard and its keys; an iOS number pad lists only its keys. */
+const keyboardRoles = new Set(['keyboard', 'key']);
 /** Live regions whose text reports what the app just did; a log can run long, so each line and their count are bounded. */
 const liveRegions = new Set(['status', 'alert', 'log']);
 const MAX_STATUSES = 20;
@@ -280,6 +285,7 @@ export function actionSpace(ctx: StepExecutorContext, observation: SpaceObservat
     controls.add('scroll_down');
   }
   if (verbs.has('back')) controls.add('back');
+  if (verbs.has('dismissKeyboard') && keyboardShowing(observation.tree)) controls.add('dismiss_keyboard');
   return {
     elements,
     element: (key) => byIndex.get(targetKeyIndex(key)),
@@ -326,6 +332,16 @@ const VERBS: Readonly<Record<Operation, string>> = {
 export function targetKeyIndex(key: string): string {
   const at = key.indexOf(':');
   return at === -1 ? key : key.slice(0, at);
+}
+
+/**
+ * Whether the tree lists an on-screen keyboard. Offering the control only
+ * then keeps a choice that does nothing out of the operation question.
+ */
+function keyboardShowing(node: ExecutorNode): boolean {
+  if (node.states?.hidden === true) return false;
+  if (keyboardRoles.has(node.role ?? '')) return true;
+  return (node.children ?? []).some(keyboardShowing);
 }
 
 /** Label the model reads: name, placeholder, or text. */
