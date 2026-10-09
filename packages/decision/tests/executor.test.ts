@@ -322,6 +322,25 @@ describe('guard rails', () => {
     expect(verdict).toMatchObject({ status: 'blocked', errorCode: 'AUTOMATION_UNSUPPORTED' });
     expect(fixture.actions.tap).toHaveBeenCalledTimes(3);
   });
+  it('blocks three failed actions while a timer ticks', async () => {
+    const { model } = scriptedDecision((id, keys) => ({
+      choice: id === 'operation' ? 'tap' : id === 'verdict' ? 'holds' : (keys[0] ?? ''),
+    }));
+    const fixture = context({ tree: BUTTONS });
+    fixture.actions.tap.mockRejectedValue(new AgentError('APP_UNREACHABLE', 'not hittable'));
+    let seconds = 20;
+    fixture.observe.mockImplementation(async () => {
+      seconds += 1;
+      const tree: ExecutorNode = { id: 'root', children: [
+        { id: 'clock', role: 'text', name: `0:${String(seconds)}` },
+        ...(BUTTONS.children ?? []),
+      ] };
+      return { revision: String(seconds), text: '#save button', truncated: false, viewport: { width: 800, height: 600 }, tree };
+    });
+    const verdict = await decisionExecutor({ model }).runStep(fixture.ctx);
+    expect(verdict).toMatchObject({ status: 'blocked', summary: 'Three actions in a row failed or changed nothing on screen.' });
+    expect(fixture.actions.tap).toHaveBeenCalledTimes(3);
+  });
   it('counts a scroll that brings other nodes into view as progress', async () => {
     const { model } = scriptedDecision((id, keys, call) => ({
       choice: id === 'operation' ? (call < 4 ? 'scroll_down' : 'done') : id === 'verdict' ? 'holds' : (keys[0] ?? ''),
@@ -350,7 +369,7 @@ describe('guard rails', () => {
     ] };
     const fixture = context({ tree });
     const verdict = await decisionExecutor({ model }).runStep(fixture.ctx);
-    expect(verdict).toMatchObject({ status: 'blocked', summary: 'Three actions in a row changed nothing on screen.' });
+    expect(verdict).toMatchObject({ status: 'blocked', summary: 'Three actions in a row failed or changed nothing on screen.' });
     expect(fixture.actions.scroll).toHaveBeenCalledTimes(3);
   });
   it('never trips the guard when pages keep changing', async () => {

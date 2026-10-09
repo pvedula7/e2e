@@ -224,7 +224,7 @@ class Step {
       if (view.space === undefined) return blocked('A complete semantic observation is required.');
       const acting: Acting = { ...view, space: view.space };
       this.settle(acting);
-      if (stalled(this.history)) return blocked('Three actions in a row changed nothing on screen.');
+      if (stalled(this.history)) return blocked('Three actions in a row failed or changed nothing on screen.');
       const decided = await this.ask(operationRequest(this.ctx, acting.space, this.history, acting.path));
       if (decided === undefined) return blocked(this.budgetMessage());
       const op = need(decided.operation, 'operation');
@@ -425,10 +425,14 @@ function seedHistory(ctx: StepExecutorContext): HistoryEntry[] {
   }
   return seeded;
 }
-/** Three recorded actions in a row with no page change. */
+/**
+ * Three recorded actions in a row that failed or left the page unchanged. A
+ * failed action is no progress even when the page changed on its own, as a
+ * ticking timer does.
+ */
 function stalled(history: readonly HistoryEntry[]): boolean {
   if (history.length < 3) return false;
-  return history.slice(-3).every((entry) => entry.pageChanged === false);
+  return history.slice(-3).every((entry) => entry.error !== undefined || entry.pageChanged === false);
 }
 /** No nodes to build an action space from. A truncated observation still acts on what is there. */
 function emptyTree(observation: ExecutorObservation): boolean {

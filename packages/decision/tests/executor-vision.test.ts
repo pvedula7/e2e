@@ -203,7 +203,7 @@ describe('vision details', () => {
     const noVision = context({ tree: BUTTONS });
     noVision.observe.mockImplementation(fixture.observe.getMockImplementation()!);
     const { model: plain } = scriptedDecision((id, keys, call) => ({ choice: id === 'operation' ? (call < 9 ? 'tap' : 'blocked') : (keys[0] ?? '') }));
-    expect(await decisionExecutor({ model: plain }).runStep(noVision.ctx)).toMatchObject({ summary: 'Three actions in a row changed nothing on screen.' });
+    expect(await decisionExecutor({ model: plain }).runStep(noVision.ctx)).toMatchObject({ summary: 'Three actions in a row failed or changed nothing on screen.' });
   });
   it('gates a point on the mass around the scored position, not the top level', async () => {
     const { model } = scriptedDecision((id, keys) => {
