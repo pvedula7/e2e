@@ -142,6 +142,12 @@ without acting. Engines with a keyboard add `typeText`, `pressKey`, and
 path outside the project root or a hidden one with `POLICY_DENIED`, and a
 missing file with `INVALID_ARGUMENT`.
 
+The observation has `keyboardVisible` when the engine measured whether an
+on-screen keyboard shows (`true` or `false`), and omits it when it didn't.
+Without it, the [decision executor](/decision-models) falls back to a
+`keyboard` or `key` node in the tree, and your own executor can check the
+screenshot from `ctx.observe({ pixels: true })`.
+
 When semantic capture fails, the observation sets `treeUnavailable: true`,
 has no `tree`, and includes a screenshot if policy allows. Earlier node ids
 are invalid, and a missing tree doesn't prove a control is absent.
