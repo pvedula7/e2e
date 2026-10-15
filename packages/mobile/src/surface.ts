@@ -147,8 +147,7 @@ const KEYBOARD_DRAG_RATIO = 0.03;
 
 /**
  * Whether the capture's producer measured the soft keyboard on screen:
- * undefined when it did not look or could not (only the iOS runner measures
- * it today).
+ * undefined when it did not look or could not.
  */
 function measuredKeyboard(raw: RawSnapshot): boolean | undefined {
   if (raw.keyboard?.kind === 'visible') return true;

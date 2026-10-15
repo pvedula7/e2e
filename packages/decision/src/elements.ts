@@ -296,7 +296,7 @@ export function actionSpace(ctx: StepExecutorContext, observation: SpaceObservat
     controls.add('scroll_down');
   }
   if (verbs.has('back')) controls.add('back');
-  if (verbs.has('dismissKeyboard') && (observation.keyboardVisible ?? keyboardShowing(observation.tree))) controls.add('dismiss_keyboard');
+  if (verbs.has('dismissKeyboard') && (observation.keyboardVisible === undefined ? keyboardShowing(observation.tree) : observation.keyboardVisible)) controls.add('dismiss_keyboard');
   return {
     elements,
     element: (key) => byIndex.get(targetKeyIndex(key)),
@@ -311,7 +311,7 @@ export function actionSpace(ctx: StepExecutorContext, observation: SpaceObservat
     omitted,
     pageText: clip(pageText.join('\n'), 6000),
     statuses,
-    fingerprint: fingerprint(observation.path ?? '', observation.tree, observation.viewport, observation.keyboardVisible, observation.pixels),
+    fingerprint: fingerprint(observation),
   };
 }
 /**
@@ -400,14 +400,8 @@ function clip(text: string, limit: number): string {
  * The keyboard state is in because a dismissal can leave the tree as it was,
  * and an unmeasured state hashes apart from a measured `false`.
  */
-function fingerprint(
-  path: string,
-  tree: ExecutorNode,
-  viewport: { width: number; height: number },
-  keyboardVisible: boolean | undefined,
-  pixels?: ExecutorPixels,
-): string {
-  const parts: (string | Uint8Array)[] = [path, JSON.stringify(keyboardVisible ?? null)];
+function fingerprint({ path, tree, viewport, keyboardVisible, pixels }: SpaceObservation): string {
+  const parts: (string | Uint8Array)[] = [path ?? '', keyboardVisible === undefined ? 'unmeasured' : String(keyboardVisible)];
   if (pixels !== undefined) parts.push(pixels.data);
   const visit = (node: ExecutorNode): void => {
     parts.push(node.role ?? '', node.name ?? '', node.text ?? '', node.value ?? '', JSON.stringify(node.states ?? null), JSON.stringify(node.attributes ?? null), intersects(node, viewport) ? 'v' : '-');

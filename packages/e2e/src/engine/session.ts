@@ -395,7 +395,7 @@ export function createEngineSession(options: EngineSessionOptions): TargetSessio
         kind: 'semantic',
         tree: stampRevision(snapshot.root, minted),
         truncated: snapshot.truncated === true,
-        ...(typeof snapshot.keyboardVisible === 'boolean' ? { keyboardVisible: snapshot.keyboardVisible } : {}),
+        ...(snapshot.keyboardVisible === undefined ? {} : { keyboardVisible: snapshot.keyboardVisible }),
         ...(snapshot.pixels === undefined ? {} : { pixels: snapshot.pixels }),
       };
       showScreen(observation);

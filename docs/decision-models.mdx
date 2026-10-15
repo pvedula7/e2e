@@ -113,9 +113,8 @@ not controls, such as a card that opens a menu on hover, and a drag can drop
 onto any of them. `tap` also reaches text fields, to open a date picker or a
 suggestion list. While an on-screen
 keyboard shows on an engine that can dismiss it, such as the mobile engine,
-the executor also offers `dismiss_keyboard`. It uses the observation's
-measured `keyboardVisible` when the engine reports one, and otherwise looks
-for a `keyboard` or `key` node in the tree.
+the executor also offers `dismiss_keyboard`, even when the keyboard is
+missing from the tree.
 
 Every operation that acts on an element asks for its target, even when only
 one element fits it.
